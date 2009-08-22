@@ -22,7 +22,7 @@
 # Configure a Linux network gateway
 # See usage for a description of the arguments
 
-. ../ubash/global.sh
+. ubash
 
 script_init "Configure Linux network gateway" \
   "INPUT-IF" GWINPUTIF "eth0" "gateway input interface" \
