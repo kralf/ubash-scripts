@@ -47,6 +47,8 @@ script_checkopts $*
 
 message_start "exporting messages from $SMS_EXPORT_DB"
 
+[ -r "$SMS_EXPORT_DB" ] || message_exit "failed to read $SMS_EXPORT_DB"
+
 if [ -z "$SMS_EXPORT_ADDRESSES" ]; then
   SMS_EXPORT_QUERY="SELECT DISTINCT address FROM $SMS_EXPORT_TABLE"
   execute_stdout SMS_EXPORT_ADDRESSES \
