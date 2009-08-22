@@ -22,6 +22,9 @@
 # Configure a Linux network gateway
 # See usage for a description of the arguments
 
+# To receive the iPhone SMS database, execute
+# scp root@xx.xx.xx.xx:/var/mobile/Library/SMS/sms.db . 
+
 . ubash
 
 script_init_array "Export SMS from iPhone SQLite database" \
@@ -46,12 +49,13 @@ message_start "exporting messages from $SMS_EXPORT_DB"
 
 if [ -z "$SMS_EXPORT_ADDRESSES" ]; then
   SMS_EXPORT_QUERY="SELECT DISTINCT address FROM $SMS_EXPORT_TABLE"
-  SMS_EXPORT_ADDRESSES=(`sqlite3 $SMS_EXPORT_DB "$SMS_EXPORT_QUERY"`)
+  execute_stdout SMS_EXPORT_ADDRESSES \
+    "sqlite3 $SMS_EXPORT_DB \"$SMS_EXPORT_QUERY\""
 fi
 
 for (( A=0; A < ${#SMS_EXPORT_ADDRESSES[*]}; A++ )); do
   if [ -r "$SMS_EXPORT_AB" ]; then
-    SMS_EXPORT_NAME="`grep ${SMS_EXPORT_ADDRESSES[$A]} $SMS_EXPORT_AB | \
+    SMS_EXPORT_NAME="`grep =${SMS_EXPORT_ADDRESSES[$A]}$ $SMS_EXPORT_AB | \
       sed s/'\([^=]\+\)=.*'/'\1'/`"
   fi
   [ -z "$SMS_EXPORT_NAME" ] && \
@@ -83,21 +87,20 @@ else
     SMS_EXPORT_QUERY="$SMS_EXPORT_QUERY 'unixepoch', 'localtime')"
     SMS_EXPORT_QUERY="$SMS_EXPORT_QUERY FROM $SMS_EXPORT_TABLE WHERE"
     SMS_EXPORT_QUERY="$SMS_EXPORT_QUERY address = '${SMS_EXPORT_ADDRESSES[$A]}'"
-    SMS_EXPORT_QUERY="$SMS_EXPORT_QUERY ORDER BY date"
     execute_stdout SMS_EXPORT_TIMES \
       "sqlite3 $SMS_EXPORT_DB \"$SMS_EXPORT_QUERY\" | utf8tolatin1"
 
     SMS_EXPORT_QUERY="SELECT flags FROM $SMS_EXPORT_TABLE WHERE"
     SMS_EXPORT_QUERY="$SMS_EXPORT_QUERY address = '${SMS_EXPORT_ADDRESSES[$A]}'"
-    SMS_EXPORT_QUERY="$SMS_EXPORT_QUERY ORDER BY date"
     execute_stdout SMS_EXPORT_FLAGS \
       "sqlite3 $SMS_EXPORT_DB \"$SMS_EXPORT_QUERY\" | utf8tolatin1"
 
     SMS_EXPORT_QUERY="SELECT text FROM $SMS_EXPORT_TABLE WHERE"
     SMS_EXPORT_QUERY="$SMS_EXPORT_QUERY address = '${SMS_EXPORT_ADDRESSES[$A]}'"
-    SMS_EXPORT_QUERY="$SMS_EXPORT_QUERY ORDER BY date"
-    execute_stdout SMS_EXPORT_TEXTS \
-      "sqlite3 -csv $SMS_EXPORT_DB \"$SMS_EXPORT_QUERY\" | utf8tolatin1"
+    SMS_EXPORT_CMD="sqlite3 -line $SMS_EXPORT_DB \"$SMS_EXPORT_QUERY\""
+    SMS_EXPORT_CMD="$SMS_EXPORT_CMD | sed s/'\s*text =\s*\(.*\)'/'\1'/"
+    SMS_EXPORT_CMD="$SMS_EXPORT_CMD | utf8tolatin1"
+    execute_stdout SMS_EXPORT_TEXTS "$SMS_EXPORT_CMD"
 
     echo "SMS conversations with ${SMS_EXPORT_NAMES[$A]}" > \
       "$SMS_EXPORT_FILE"
@@ -107,9 +110,13 @@ else
     for (( M=0; M < ${#SMS_EXPORT_TIMES[*]}; M++ )); do
       [ "$M" -gt 0 ] && echo >> "$SMS_EXPORT_FILE"
       for (( ; T < ${#SMS_EXPORT_TEXTS[*]}; T++ )); do
+        [ -z "${SMS_EXPORT_TEXTS[$T]}" ] && break
         echo "${SMS_EXPORT_TEXTS[$T]}" >> "$SMS_EXPORT_FILE"
-        [[ "${SMS_EXPORT_TEXTS[$T]}" =~ \"$ ]] && math_inc T && break
       done
+      for (( ; T < ${#SMS_EXPORT_TEXTS[*]}; T++ )); do
+        [ -n "${SMS_EXPORT_TEXTS[$T]}" ] && break
+      done
+
       [ "${SMS_EXPORT_FLAGS[$M]}" == 3 ] && \
         echo -n "Sent to " >> "$SMS_EXPORT_FILE"
       [ "${SMS_EXPORT_FLAGS[$M]}" == 2 ] && \
