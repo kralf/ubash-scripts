@@ -33,7 +33,7 @@ script_setopt "--target" "DIR" FULLBACKUPTARGET "/home/backups/full" \
 
 script_checkopts $*
 
-message_start "configuring gateway at interface $GWINTERFACE"
+message_start "configuring gateway at interface $GWINPUTIF"
 
 script_checkroot
 
