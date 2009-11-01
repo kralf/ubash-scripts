@@ -28,9 +28,6 @@ script_init "Configure Linux network gateway" \
   "INPUT-IF" GWINPUTIF "eth0" "gateway input interface" \
   "OUTPUT-IF" GWOUTPUTIF "eth1" "gateway output interface"
 
-script_setopt "--target" "DIR" FULLBACKUPTARGET "/home/backups/full" \
-  "backup target directory"
-
 script_checkopts $*
 
 message_start "configuring gateway at interface $GWINPUTIF"
