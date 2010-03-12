@@ -57,7 +57,7 @@ if false X264SNDPASS; then
   X264CMD="$X264MENCODER -ovc x264 -nosound -o 1.$X264OUTPUT"
   X264CMD="$X264CMD -x264encopts pass=1:subq=5:8x8dct:frameref=2:bframes=3:"
   X264CMD="${X264CMD}b_pyramid:weight_b:bitrate=$X264BITRATE:qcomp=0.6 -noskip"
-  [ "$FRAMERATE" != "" ] && X264CMD="$X264CMD -ofps $X264FRAMERATE"
+  [ "$X264FRAMERATE" != "" ] && X264CMD="$X264CMD -ofps $X264FRAMERATE"
   [ "$X264SIZE" != "" ] && X264CMD="$X264CMD -vf scale=$X264SIZE"
   [ "$X264END" != "" ] && X264CMD="$X264CMD -endpos $X264END"
 
@@ -72,7 +72,7 @@ if false X264FSTPASS; then
   X264CMD="$X264MENCODER -ovc x264 -oac $X264AUDIO -o 2.$X264OUTPUT"
   X264CMD="$X264CMD -x264encopts pass=2:subq=5:8x8dct:frameref=2:bframes=3:"
   X264CMD="${X264CMD}b_pyramid:weight_b:bitrate=$X264BITRATE:qcomp=0.6 -noskip"
-  [ "$FRAMERATE" != "" ] && X264CMD="$X264CMD -ofps $X264FRAMERATE"
+  [ "$X264FRAMERATE" != "" ] && X264CMD="$X264CMD -ofps $X264FRAMERATE"
   [ "$X264SIZE" != "" ] && X264CMD="$X264CMD -vf scale=$X264SIZE"
   [ "$X264END" != "" ] && X264CMD="$X264CMD -endpos $X264END"
 
