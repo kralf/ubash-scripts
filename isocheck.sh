@@ -48,8 +48,8 @@ for (( I=0; I < ${#ISO_CHECK_IMAGES[*]}; I++ )); do
     ISO_CHECK_CMD="mount -o loop,iocharset=$ISO_CHECK_CHARSET"
     ISO_CHECK_CMD="$ISO_CHECK_CMD \"${ISO_CHECK_IMAGES[$I]}\""
     execute "$ISO_CHECK_CMD \"$ISO_CHECK_MP\""
-    ISO_CHECK_CMD="find \"$ISO_CHECK_MP\" -type f"
-    ISO_CHECK_CMD="$ISO_CHECK_CMD | xargs -I F dd if=F of=$ISO_CHECK_NULL"
+    ISO_CHECK_CMD="find \"$ISO_CHECK_MP\" -type f -print0"
+    ISO_CHECK_CMD="$ISO_CHECK_CMD | xargs -0 -I F dd if=F of=$ISO_CHECK_NULL"
     execute "$ISO_CHECK_CMD"
     execute "umount \"$ISO_CHECK_MP\""
 
