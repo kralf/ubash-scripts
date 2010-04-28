@@ -34,6 +34,8 @@ script_setopt "--framerate" "RATE" X264FRAMERATE "" \
   "optional framerate used for encoding"
 script_setopt "--size" "WIDTH:HEIGHT" X264SIZE "" \
   "optional frame size of target video"
+script_setopt "--rotate" "[cw|ccw]" X264ROTATE "" \
+  "optional rotation of target video"
 script_setopt "--audio" "CODEC" X264AUDIO "copy" \
   "audio codec used for encoding"
 
@@ -59,6 +61,8 @@ if false X264SNDPASS; then
   X264CMD="${X264CMD}b_pyramid:weight_b:bitrate=$X264BITRATE:qcomp=0.6 -noskip"
   [ "$X264FRAMERATE" != "" ] && X264CMD="$X264CMD -ofps $X264FRAMERATE"
   [ "$X264SIZE" != "" ] && X264CMD="$X264CMD -vf scale=$X264SIZE"
+  [ "$X264ROTATE" == "cw" ] && X264CMD="$X264CMD -vf rotate=1"
+  [ "$X264ROTATE" == "ccw" ] && X264CMD="$X264CMD -vf rotate=2"
   [ "$X264END" != "" ] && X264CMD="$X264CMD -endpos $X264END"
 
   execute "$X264CMD $X264INPUTMASK"
@@ -74,6 +78,8 @@ if false X264FSTPASS; then
   X264CMD="${X264CMD}b_pyramid:weight_b:bitrate=$X264BITRATE:qcomp=0.6 -noskip"
   [ "$X264FRAMERATE" != "" ] && X264CMD="$X264CMD -ofps $X264FRAMERATE"
   [ "$X264SIZE" != "" ] && X264CMD="$X264CMD -vf scale=$X264SIZE"
+  [ "$X264ROTATE" == "cw" ] && X264CMD="$X264CMD -vf rotate=1"
+  [ "$X264ROTATE" == "ccw" ] && X264CMD="$X264CMD -vf rotate=2"
   [ "$X264END" != "" ] && X264CMD="$X264CMD -endpos $X264END"
 
   execute "$X264CMD $X264INPUTMASK"
