@@ -27,8 +27,10 @@
 script_init "Two-pass encode x264 video" \
   "FILE" X264INPUTMASK "" "input file (mask)"
 
-script_setopt "--output|-o" "FILE" X264OUTPUT "out.mkv" \
+script_setopt "--output|-o" "FILE" X264OUTPUT "out.x264" \
   "optional output video file"
+script_setopt "--format|-f" "FORMAT" X264FORMAT "rawvideo" \
+  "optional output file format"
 script_setopt "--bitrate" "RATE" X264BITRATE "4000" "bitrate used for encoding"
 script_setopt "--framerate" "RATE" X264FRAMERATE "" \
   "optional framerate used for encoding"
@@ -36,6 +38,8 @@ script_setopt "--size" "WIDTH:HEIGHT" X264SIZE "" \
   "optional frame size of target video"
 script_setopt "--rotate" "[cw|ccw]" X264ROTATE "" \
   "optional rotation of target video"
+script_setopt "--crop" "WIDTH:HEIGHT" X264CROP "" \
+  "optional crop of target video"
 script_setopt "--audio" "CODEC" X264AUDIO "copy" \
   "audio codec used for encoding"
 
@@ -56,13 +60,15 @@ message_start "encoding input file(s) $X264INPUTMASK"
 if false X264SNDPASS; then
   message_start "first pass"
 
-  X264CMD="$X264MENCODER -ovc x264 -nosound -o 1.$X264OUTPUT"
+  X264CMD="$X264MENCODER -ovc x264 -nosound -o 1.$X264OUTPUT -of $X264FORMAT"
   X264CMD="$X264CMD -x264encopts pass=1:subq=5:8x8dct:frameref=2:bframes=3:"
-  X264CMD="${X264CMD}b_pyramid:weight_b:bitrate=$X264BITRATE:qcomp=0.6 -noskip"
+  X264CMD="${X264CMD}b_pyramid=normal:weight_b:bitrate=$X264BITRATE:qcomp=0.6"
+  X264CMD="$X264CMD -noskip"
   [ "$X264FRAMERATE" != "" ] && X264CMD="$X264CMD -ofps $X264FRAMERATE"
   [ "$X264SIZE" != "" ] && X264CMD="$X264CMD -vf scale=$X264SIZE"
   [ "$X264ROTATE" == "cw" ] && X264CMD="$X264CMD -vf rotate=1"
   [ "$X264ROTATE" == "ccw" ] && X264CMD="$X264CMD -vf rotate=2"
+  [ "$X264CROP" != "" ] && X264CMD="$X264CMD -vf crop=$X264CROP"
   [ "$X264END" != "" ] && X264CMD="$X264CMD -endpos $X264END"
 
   execute "$X264CMD $X264INPUTMASK"
@@ -74,12 +80,15 @@ if false X264FSTPASS; then
   message_start "second pass"
 
   X264CMD="$X264MENCODER -ovc x264 -oac $X264AUDIO -o 2.$X264OUTPUT"
+  X264CMD="$X264CMD -of $X264FORMAT"
   X264CMD="$X264CMD -x264encopts pass=2:subq=5:8x8dct:frameref=2:bframes=3:"
-  X264CMD="${X264CMD}b_pyramid:weight_b:bitrate=$X264BITRATE:qcomp=0.6 -noskip"
+  X264CMD="${X264CMD}b_pyramid=normal:weight_b:bitrate=$X264BITRATE:qcomp=0.6"
+  X264CMD="$X264CMD -noskip"
   [ "$X264FRAMERATE" != "" ] && X264CMD="$X264CMD -ofps $X264FRAMERATE"
   [ "$X264SIZE" != "" ] && X264CMD="$X264CMD -vf scale=$X264SIZE"
   [ "$X264ROTATE" == "cw" ] && X264CMD="$X264CMD -vf rotate=1"
   [ "$X264ROTATE" == "ccw" ] && X264CMD="$X264CMD -vf rotate=2"
+  [ "$X264CROP" != "" ] && X264CMD="$X264CMD -vf crop=$X264CROP"
   [ "$X264END" != "" ] && X264CMD="$X264CMD -endpos $X264END"
 
   execute "$X264CMD $X264INPUTMASK"
