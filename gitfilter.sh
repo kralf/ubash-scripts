@@ -32,7 +32,17 @@ script_init \
   "BRANCH" GIT_FILTER_BRANCH "$GIT_FILTER_BRANCH" \
   "name of the branch to be filtered"
 
+script_setopt "--rename|-r" "BRANCH" GIT_FILTER_RENAME "" \
+  "rename the branch before filtering"
+
 script_checkopts $*
+
+if [ -n "$GIT_FILTER_RENAME" ]; then
+  message_start "renaming branch $GIT_FILTER_BRANCH to $GIT_FILTER_RENAME"
+  git branch -m $GIT_FILTER_BRANCH $GIT_FILTER_RENAME
+  GIT_FILTER_BRANCH=$GIT_FILTER_RENAME
+  message_end
+fi
 
 message_start "filtering branch $GIT_FILTER_BRANCH"
 
@@ -48,12 +58,13 @@ for FILE in $FILES; do
     mv "$FILE" "$GIT_FILTER_DIR/$FILE"
   fi
 done
-IFS=" "'
+IFS=" "
+' -- --branches=$GIT_FILTER_BRANCH
 
 GIT_FILTER_PREFIX="$GIT_FILTER_BRANCH: " \
 git filter-branch -f --msg-filter '
   sed "s/^\(.\+\)$/$GIT_FILTER_PREFIX\\1/"
-'
+' -- --branches=$GIT_FILTER_BRANCH
 
 log_clean
 
