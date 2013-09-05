@@ -53,10 +53,8 @@ mkdir -p $GIT_FILTER_DIR
 IFS="
 "
 for FILE in $FILES; do 
-  if [ -f "$FILE" ]; then
-    mkdir -p $GIT_FILTER_DIR/`dirname "$FILE"`
-    mv "$FILE" "$GIT_FILTER_DIR/$FILE"
-  fi
+  mkdir -p $GIT_FILTER_DIR/`dirname "$FILE"`
+  mv "$FILE" "$GIT_FILTER_DIR/$FILE"
 done
 IFS=" "
 ' -- --branches=$GIT_FILTER_BRANCH
