@@ -27,6 +27,8 @@
 script_init "Configure Linux network gateway" \
   "INPUT-IF" GWINPUTIF "eth0" "gateway input interface" \
   "OUTPUT-IF" GWOUTPUTIF "eth1" "gateway output interface"
+script_setopt "--disable|-d" "" GWDISABLE "false" \
+  "disable packet forwarding"
 
 script_checkopts $*
 
@@ -41,15 +43,21 @@ execute "iptables --delete-chain"
 execute "iptables --table nat --delete-chain"
 message_end
 
-message_start "adding IP forwarding and masquerading rules"
-execute "iptables --table nat --append POSTROUTING --out-interface \
-  $GWOUTPUTIF -j MASQUERADE"
-execute "iptables --append FORWARD --in-interface $GWINPUTIF -j ACCEPT"
-message_end
+if true GWDISABLE; then
+  message_start "disable kernel packet forwarding"
+  execute "echo 0 > /proc/sys/net/ipv4/ip_forward"
+  message_end
+else
+  message_start "adding IP forwarding and masquerading rules"
+  execute "iptables --table nat --append POSTROUTING --out-interface \
+    $GWOUTPUTIF -j MASQUERADE"
+  execute "iptables --append FORWARD --in-interface $GWINPUTIF -j ACCEPT"
+  message_end
 
-message_start "enabling kernel packet forwarding"
-execute "echo 1 > /proc/sys/net/ipv4/ip_forward"
-message_end
+  message_start "enabling kernel packet forwarding"
+  execute "echo 1 > /proc/sys/net/ipv4/ip_forward"
+  message_end
+fi
 
 log_clean
 

@@ -1,3 +1,10 @@
+ubash-scripts (0.1-17) unstable; urgency=low
+
+  * Added ifloop.sh
+  * Added disable argument to mkgw.sh
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Thu, 02 Oct 2014 14:45:00 +0200
+ 
 ubash-scripts (0.1-16) unstable; urgency=low
 
   * Turned into a ReMake project
